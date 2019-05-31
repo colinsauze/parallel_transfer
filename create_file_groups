@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#script to split a directory into lists of roughly equal sized groups of files
+
+if [ "$#" != "2" ] ; then
+
+    echo "Usage: create_file_groups num_of_groups directory"
+    exit 1
+fi
+
+dir=$2
+
+total_size=`du -b $dir | awk '{print $1}'`
+
+
+number_of_groups=$1
+group_size=$[$total_size/$number_of_groups]
+
+find $dir -type f -exec du -b {} \; > filesizes
+
+#delete lines with non-ascii characters
+LANG=C sed -i "/[\d128-\d255]/d" filesizes
+
+sed -i 's#'"$dir"'##g' filesizes
+
+python create_file_groups.py $group_size
+
+
