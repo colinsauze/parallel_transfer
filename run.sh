@@ -51,13 +51,13 @@ elif [ "$backend" = "Slurm" ] ; then
     echo "#!/bin/bash --login" > $slurm_file
     echo "###" >> $slurm_file
     echo "#SBATCH --job-name=parallel_transfer" >> $slurm_file
-    echo "#SBATCH --output=parallel_transfer.out.%J-%A" >> $slurm_file
-    echo "#SBATCH --error=parallel_transfer.err.%J-%A" >> $slurm_file
+    echo "#SBATCH --output=parallel_transfer.out.%J-%a" >> $slurm_file
+    echo "#SBATCH --error=parallel_transfer.err.%J-%a" >> $slurm_file
     echo "###" >> $slurm_file
-    echo "filename=group_\$[\$SLURM_TASK_ID-1]" >> $slurm_file
-    echo "echo \"task \$SLURM_TASK_ID copying files from \$filename\"" >> $slurm_file
-    echo "echo \"sleeping for \$[\$SLURM_TASK_ID*15] seconds\"" >> $slurm_file
-    echo "sleep \$[\$SLURM_TASK_ID*15]" >> $slurm_file
+    echo "filename=group_\$[\$SLURM_ARRAY_TASK_ID-1]" >> $slurm_file
+    echo "echo \"task \$SLURM_ARRAY_TASK_ID copying files from \$filename\"" >> $slurm_file
+    echo "echo \"sleeping for \$[\$SLURM_ARRAY_TASK_ID*15] seconds\"" >> $slurm_file
+    echo "sleep \$[\$SLURM_ARRAY_TASK_ID*15]" >> $slurm_file
     echo "echo \"Starting rsync\"" >> $slurm_file
     echo "rsync -ave ssh --files-from=\$filename $src_dir $dst_dir" >> $slurm_file
 
