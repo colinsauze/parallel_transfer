@@ -10,8 +10,9 @@ fi
 
 dir=$2
 
-total_size=`du -b $dir | awk '{print $1}'`
+total_size=`du -bs $dir | awk '{print $1}'`
 
+echo "total size is $total_size"
 
 number_of_groups=$1
 group_size=$[$total_size/$number_of_groups]

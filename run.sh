@@ -1,6 +1,6 @@
 #!/bin/bash
 
-backend=SGE
+backend=Parallel
 
 echo "How many groups do you want?"
 
@@ -14,7 +14,7 @@ echo "What is the destination path (username@hostname:directory)?"
 
 read dst_dir
 
-./create_file_groups $num_groups
+./create_file_groups $num_groups $src_dir
 
 if [ "$backend" = "SGE" ] ; then
 
@@ -37,6 +37,11 @@ if [ "$backend" = "SGE" ] ; then
 
     qsub -t 1-$num_groups $sge_file
 
+    # cleanup with a final rsync
+    echo "When the job is complete run a manual rsync to cleanup any files which might have been missed"
+    echo "rsync -ave ssh $src_dir $dst_dir"
+
+
 elif [ "$backend" = "Slurm" ] ; then
 
     #Slurm version
@@ -58,18 +63,21 @@ elif [ "$backend" = "Slurm" ] ; then
 
     sbatch --array=1-$num_groups $slurm_file
 
+    # cleanup with a final rsync
+    echo "When the job is complete run a manual rsync to cleanup any files which might have been missed"
+    echo "rsync -ave ssh $src_dir $dst_dir"
+
+
 elif [ "$backend" = "Parallel" ] ; then
 
     #GNU Parallel version
     ls group_* | parallel -j $num_groups --joblog=rsync_jobs --delay=15 "rsync -ave ssh --files-from={} $src_dir $dst_dir"
 
+    #double check everything transferred by running a single rsync again
+    rsync -ave ssh $src_dir $dst_dir
 else 
 
     echo "Unknown backed $backend"
 
 fi
 
-
-# cleanup with a final rsync
-echo "When the job is complete run a manual rsync to cleanup any files which might have been missed"
-echo "rsync -ave ssh $src_dir $dst_dir"
